@@ -149,15 +149,6 @@ The whole app was built with **[Claude Code](https://claude.com/claude-code)**, 
 
 It turned out useful enough that I'm sharing it. I hope it helps you too.
 
-## Contributing
-
-Issues and pull requests are welcome, especially for:
-
-- Testing on Apple Silicon (see [Compatibility](#compatibility)) and refining the sensor mapping
-- A settings panel (choose which stats appear in the menu bar)
-- Notifications (e.g. CPU temperature above a threshold)
-- Signed and notarized releases
-
 ## License
 
 [MIT](LICENSE)
