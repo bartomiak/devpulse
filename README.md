@@ -63,7 +63,7 @@ DevPulse is currently distributed as source. Building takes about a minute and *
 xcode-select --install
 
 # 2. Clone and build
-git clone https://github.com/<your-username>/devpulse.git
+git clone https://github.com/bartomiak/devpulse.git
 cd devpulse
 ./build.sh release
 
