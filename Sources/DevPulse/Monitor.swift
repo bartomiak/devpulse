@@ -31,8 +31,7 @@ final class Monitor: ObservableObject {
     private var cpuSampler = CPUSampler()
     private var networkSampler = NetworkSampler()
     private let memorySampler = MemorySampler()
-    private var temperatureSampler = TemperatureSampler(keys: TemperatureSampler.cpuKeys)
-    private var gpuTemperatureSampler = TemperatureSampler(keys: TemperatureSampler.gpuKeys)
+    private var thermalReader = ThermalReader()
     private var tickCount = 0
     private var task: Task<Void, Never>?
 
@@ -55,10 +54,11 @@ final class Monitor: ObservableObject {
         if let value = cpuSampler.sample() {
             append(&cpu, Sample(time: now, value: value))
         }
-        if let value = temperatureSampler.sample() {
+        let thermal = thermalReader.sample()
+        if let value = thermal.cpu {
             append(&temperature, Sample(time: now, value: value))
         }
-        if let value = gpuTemperatureSampler.sample() {
+        if let value = thermal.gpu {
             append(&gpuTemperature, Sample(time: now, value: value))
         }
         if let rate = networkSampler.sample() {

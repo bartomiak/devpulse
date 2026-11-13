@@ -6,6 +6,14 @@ struct DevPulseApp: App {
     @StateObject private var monitor = Monitor()
     @StateObject private var processMonitor = ProcessMonitor()
 
+    init() {
+        // `DevPulse --sensors` prints every sensor it can see and exits – useful for bug reports.
+        if CommandLine.arguments.contains("--sensors") {
+            SensorReport.print()
+            exit(0)
+        }
+    }
+
     var body: some Scene {
         MenuBarExtra {
             ContentView(monitor: monitor, processMonitor: processMonitor)

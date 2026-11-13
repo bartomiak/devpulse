@@ -178,12 +178,15 @@ enum BatteryReader {
 
 // MARK: - Temperature
 
-/// Temperature from the SMC (Intel Macs). Picks the first key that works and remembers it.
+/// Temperature from the SMC. Picks the first key that works and remembers it.
 struct TemperatureSampler {
-    /// CPU: PECI/die → proximity. Different Mac models expose different keys.
-    static let cpuKeys = ["TCXC", "TC0F", "TC0E", "TC0D", "TC0P", "TC0H", "TC1C"]
-    /// GPU: proximity → discrete GPU die (TGDD drops when the dGPU is asleep).
-    static let gpuKeys = ["TG0P", "TG1P", "TG0D", "TGDD"]
+    /// CPU. Intel: PECI/die → proximity. Then Apple Silicon (M1–M3) performance-core keys.
+    static let cpuKeys = ["TCXC", "TC0F", "TC0E", "TC0D", "TC0P", "TC0H", "TC1C",
+                          "Tp09", "Tp0T", "Tp01", "Tp05", "Tp0D", "Tp0b"]
+    /// GPU. Intel: proximity → discrete GPU die (TGDD drops when the dGPU is asleep).
+    /// Then Apple Silicon GPU keys.
+    static let gpuKeys = ["TG0P", "TG1P", "TG0D", "TGDD",
+                          "Tg05", "Tg0D", "Tg0f", "Tg0j", "Tg0L"]
 
     private let candidates: [String]
     private(set) var activeKey: String?
