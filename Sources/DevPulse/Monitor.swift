@@ -6,11 +6,10 @@ struct Sample: Identifiable {
     let value: Double
 }
 
-/// Samples every second and keeps a history of the last `historyLength` seconds.
+/// Samples every `Pref.interval` seconds (1 s by default) and keeps the last `historyLength` samples.
 @MainActor
 final class Monitor: ObservableObject {
     static let historyLength = 60
-    static let interval: UInt64 = 1_000_000_000 // 1 s
 
     @Published private(set) var cpu: [Sample] = []
     @Published private(set) var temperature: [Sample] = []
@@ -45,7 +44,8 @@ final class Monitor: ObservableObject {
         task = Task { [weak self] in
             while !Task.isCancelled {
                 self?.tick()
-                try? await Task.sleep(nanoseconds: Monitor.interval)
+                // Read each time, so changes in Settings apply immediately
+                try? await Task.sleep(nanoseconds: UInt64(Pref.interval * 1_000_000_000))
             }
         }
     }
@@ -80,8 +80,8 @@ final class Monitor: ObservableObject {
             append(&diskWrite, Sample(time: now, value: rate.write))
         }
         fans = FanReader.read()
-        // Battery and free space change slowly – every 5 s is enough
-        if tickCount % 5 == 0 {
+        // Battery and free space change slowly – every ~5 s is enough
+        if tickCount % max(Int(5 / Pref.interval), 1) == 0 {
             battery = BatteryReader.read()
             diskSpace = DiskSpace.read()
         }
@@ -163,6 +163,11 @@ enum Format {
         minutes >= 60
             ? String(format: "%d h %02d min", minutes / 60, minutes % 60)
             : "\(minutes) min"
+    }
+
+    /// "60 s", "2 min", "5 min"
+    static func historySpan(seconds: Double) -> String {
+        seconds < 120 ? "\(Int(seconds)) s" : "\(Int(seconds / 60)) min"
     }
 
     /// Short temperature for the menu bar, e.g. "94°".

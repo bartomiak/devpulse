@@ -27,6 +27,21 @@ struct DevPulseApp: App {
     }
 }
 
+/// Which stats appear in the menu bar (Settings → Menu bar).
+struct MenuBarOptions {
+    var network: Bool
+    var cpu: Bool
+    var cpuTemperature: Bool
+    var memory: Bool
+    var gpuTemperature: Bool
+    var disk: Bool
+    var battery: Bool
+
+    var isEmpty: Bool {
+        !(network || cpu || cpuTemperature || memory || gpuTemperature || disk || battery)
+    }
+}
+
 /// The menu bar label.
 ///
 /// The menu bar only shows a single Text or Image from the label, and SF Symbols embedded
@@ -35,13 +50,31 @@ struct DevPulseApp: App {
 struct MenuBarLabel: View {
     @ObservedObject var monitor: Monitor
 
+    @AppStorage(Pref.menuNetwork) private var network = true
+    @AppStorage(Pref.menuCPU) private var cpu = true
+    @AppStorage(Pref.menuCPUTemp) private var cpuTemperature = true
+    @AppStorage(Pref.menuMemory) private var memory = true
+    @AppStorage(Pref.menuGPUTemp) private var gpuTemperature = true
+    @AppStorage(Pref.menuDisk) private var disk = false
+    @AppStorage(Pref.menuBattery) private var battery = true
+
+    private var options: MenuBarOptions {
+        MenuBarOptions(network: network, cpu: cpu, cpuTemperature: cpuTemperature, memory: memory,
+                       gpuTemperature: gpuTemperature, disk: disk, battery: battery)
+    }
+
     var body: some View {
-        Image(nsImage: render())
+        if options.isEmpty {
+            // Keep something clickable when every stat is turned off
+            Image(systemName: "waveform.path.ecg")
+        } else {
+            Image(nsImage: render())
+        }
     }
 
     @MainActor
     private func render() -> NSImage {
-        let renderer = ImageRenderer(content: MenuBarContent(monitor: monitor))
+        let renderer = ImageRenderer(content: MenuBarContent(monitor: monitor, options: options))
         renderer.scale = NSScreen.main?.backingScaleFactor ?? 2
         let image = renderer.nsImage ?? NSImage()
         image.isTemplate = true
@@ -49,32 +82,51 @@ struct MenuBarLabel: View {
     }
 }
 
-/// ↓1.2M ↑30K   [cpu] 23% 94°   [ram] 68%   [gpu] 59°   [battery] 100%
+/// ↓1.2M ↑30K   [cpu] 23% 94°   [ram] 68%   [gpu] 59°   [disk] 597 GB   [battery] 100%
 private struct MenuBarContent: View {
     let monitor: Monitor
+    let options: MenuBarOptions
 
     var body: some View {
         HStack(spacing: 10) {
-            HStack(spacing: 1) {
-                icon("arrow.down")
-                value(Format.compactRate(monitor.currentDownload), width: 36)
-                icon("arrow.up")
-                value(Format.compactRate(monitor.currentUpload), width: 36)
+            if options.network {
+                HStack(spacing: 1) {
+                    icon("arrow.down")
+                    value(Format.compactRate(monitor.currentDownload), width: 36)
+                    icon("arrow.up")
+                    value(Format.compactRate(monitor.currentUpload), width: 36)
+                }
             }
-            HStack(spacing: 3) {
-                icon("cpu")
-                value(Format.percent(monitor.currentCPU), width: 32)
-                value(Format.degrees(monitor.currentTemperature), width: 28)
+            if options.cpu || options.cpuTemperature {
+                HStack(spacing: 3) {
+                    icon("cpu")
+                    if options.cpu {
+                        value(Format.percent(monitor.currentCPU), width: 32)
+                    }
+                    if options.cpuTemperature {
+                        value(Format.degrees(monitor.currentTemperature), width: 28)
+                    }
+                }
             }
-            HStack(spacing: 3) {
-                icon("memorychip")
-                value(Format.percent(monitor.memoryUsage?.percent), width: 32)
+            if options.memory {
+                HStack(spacing: 3) {
+                    icon("memorychip")
+                    value(Format.percent(monitor.memoryUsage?.percent), width: 32)
+                }
             }
-            HStack(spacing: 3) {
-                icon("display")
-                value(Format.degrees(monitor.currentGPUTemperature), width: 28)
+            if options.gpuTemperature {
+                HStack(spacing: 3) {
+                    icon("display")
+                    value(Format.degrees(monitor.currentGPUTemperature), width: 28)
+                }
             }
-            if let battery = monitor.battery {
+            if options.disk, let space = monitor.diskSpace {
+                HStack(spacing: 3) {
+                    icon("internaldrive")
+                    value(Format.storage(space.available), width: 50)
+                }
+            }
+            if options.battery, let battery = monitor.battery {
                 HStack(spacing: 3) {
                     icon(battery.symbolName)
                     value("\(battery.percent)%", width: 40)

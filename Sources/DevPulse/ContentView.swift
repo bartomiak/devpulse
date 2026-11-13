@@ -21,33 +21,60 @@ struct ContentView: View {
     @ObservedObject var networkInfo: NetworkInfoModel
     @AppStorage("selectedTab") private var tab: Tab = .charts
     @State private var chartsHeight: CGFloat = 0
+    @State private var showingSettings = false
+
+    @AppStorage(Pref.showNetwork) private var showNetwork = true
+    @AppStorage(Pref.showConnection) private var showConnection = true
+    @AppStorage(Pref.showCPU) private var showCPU = true
+    @AppStorage(Pref.showMemory) private var showMemory = true
+    @AppStorage(Pref.showDisk) private var showDisk = true
+    @AppStorage(Pref.showTemperature) private var showTemperature = true
+    @AppStorage(Pref.showFans) private var showFans = true
+    @AppStorage(Pref.showBattery) private var showBattery = true
+    @AppStorage(Pref.refreshInterval) private var refreshInterval = 1.0
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Picker("", selection: $tab) {
-                ForEach(Tab.allCases, id: \.self) { Text($0.title).tag($0) }
-            }
-            .pickerStyle(.segmented)
-            .labelsHidden()
+            if showingSettings {
+                SettingsView { showingSettings = false }
+            } else {
+                Picker("", selection: $tab) {
+                    ForEach(Tab.allCases, id: \.self) { Text($0.title).tag($0) }
+                }
+                .pickerStyle(.segmented)
+                .labelsHidden()
 
-            switch tab {
-            case .charts:
-                chartsTab
-            case .processes:
-                ProcessesView(processMonitor: processMonitor)
-            case .ports:
-                PortsView(processMonitor: processMonitor)
-            case .services:
-                ServicesView(model: brewServices)
+                switch tab {
+                case .charts:
+                    chartsTab
+                case .processes:
+                    ProcessesView(processMonitor: processMonitor)
+                case .ports:
+                    PortsView(processMonitor: processMonitor)
+                case .services:
+                    ServicesView(model: brewServices)
+                }
             }
 
             Divider()
 
             HStack {
-                Text(footerText)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+                if !showingSettings {
+                    Text(footerText)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
                 Spacer()
+                Button {
+                    showingSettings.toggle()
+                } label: {
+                    Image(systemName: "gearshape")
+                }
+                .buttonStyle(.plain)
+                .foregroundStyle(showingSettings ? Color.accentColor : .secondary)
+                .keyboardShortcut(",")
+                .help("Settings (⌘,)")
+
                 Button("Quit") { NSApplication.shared.terminate(nil) }
                     .keyboardShortcut("q")
             }
@@ -78,16 +105,22 @@ struct ContentView: View {
 
     private var chartSections: some View {
         VStack(alignment: .leading, spacing: 16) {
-            networkSection
-            cpuSection
-            memorySection
-            diskSection
-            temperatureSection
-            if !monitor.fans.isEmpty {
+            if showNetwork { networkSection }
+            if showCPU { cpuSection }
+            if showMemory { memorySection }
+            if showDisk { diskSection }
+            if showTemperature { temperatureSection }
+            if showFans, !monitor.fans.isEmpty {
                 fanSection
             }
-            if let battery = monitor.battery {
+            if showBattery, let battery = monitor.battery {
                 batterySection(battery)
+            }
+            if !(showNetwork || showCPU || showMemory || showDisk || showTemperature || showFans || showBattery) {
+                Text("All charts are hidden – enable them in Settings (⌘,)")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity, minHeight: 60)
             }
         }
     }
@@ -99,7 +132,7 @@ struct ContentView: View {
 
     private var footerText: String {
         switch tab {
-        case .charts:    return "Last \(Monitor.historyLength) s"
+        case .charts:    return "Last \(Format.historySpan(seconds: Double(Monitor.historyLength) * refreshInterval))"
         case .processes: return "Refreshed every 3 s"
         case .ports:     return "Click a port to open it in the browser"
         case .services:  return "Managed with brew services"
@@ -176,8 +209,10 @@ struct ContentView: View {
             }
             .frame(height: 80)
 
-            NetworkInfoView(model: networkInfo)
-                .padding(.top, 2)
+            if showConnection {
+                NetworkInfoView(model: networkInfo)
+                    .padding(.top, 2)
+            }
         }
     }
 

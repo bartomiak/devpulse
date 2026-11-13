@@ -63,6 +63,9 @@ The reason this app exists. You get every listening TCP port **together with the
 ### 🍺 Homebrew services
 See which `brew services` are running (PostgreSQL, Redis, MySQL…) and **start, stop or restart** them with one click, without remembering the exact formula name. The list is only refreshed while the tab is open.
 
+### ⚙️ Settings
+Press **⌘,** (or the gear icon) to choose which stats appear in the menu bar and which sections the Charts tab shows, set the refresh interval (1, 2 or 5 s) and turn on **launch at login**.
+
 ### 🪶 Lightweight and native
 Written in Swift and SwiftUI, with no Electron and no dependencies. Processes and ports are only polled while the popover is open, so it costs next to nothing in the background. No Dock icon.
 
@@ -84,7 +87,7 @@ cp -R build/DevPulse.app /Applications/
 open /Applications/DevPulse.app
 ```
 
-**Start at login:** *System Settings → General → Login Items → +* → select DevPulse.
+**Start at login:** enable *Launch at login* in DevPulse's settings (⌘,).
 
 ## Compatibility
 
@@ -134,6 +137,7 @@ VS Code users can press `⇧⌘B` to run the **Build & Run** task. Install the r
 | `Sources/DevPulse/BrewServices.swift` | Services tab (`brew services`) |
 | `Sources/DevPulse/NetworkInfo.swift` | Wi-Fi details, IP addresses and ping |
 | `Sources/DevPulse/Disk.swift` | Disk throughput and free space |
+| `Sources/DevPulse/Settings.swift` | Settings panel, preferences and launch at login |
 | `Sources/CSMC/` | AppleSMC and IOHIDEventSystem sensor access, written in C |
 
 </details>
