@@ -21,17 +21,23 @@ final class Monitor: ObservableObject {
     @Published private(set) var memoryUsage: MemorySampler.Usage?
     @Published private(set) var battery: BatteryInfo?
     @Published private(set) var fans: [Fan] = []
+    @Published private(set) var diskRead: [Sample] = []
+    @Published private(set) var diskWrite: [Sample] = []
+    @Published private(set) var diskSpace: DiskSpace?
 
     var currentCPU: Double? { cpu.last?.value }
     var currentTemperature: Double? { temperature.last?.value }
     var currentGPUTemperature: Double? { gpuTemperature.last?.value }
     var currentDownload: Double? { download.last?.value }
     var currentUpload: Double? { upload.last?.value }
+    var currentDiskRead: Double? { diskRead.last?.value }
+    var currentDiskWrite: Double? { diskWrite.last?.value }
 
     private var cpuSampler = CPUSampler()
     private var networkSampler = NetworkSampler()
     private let memorySampler = MemorySampler()
     private var thermalReader = ThermalReader()
+    private var diskSampler = DiskSampler()
     private var tickCount = 0
     private var task: Task<Void, Never>?
 
@@ -69,10 +75,15 @@ final class Monitor: ObservableObject {
             memoryUsage = usage
             append(&memory, Sample(time: now, value: usage.percent))
         }
+        if let rate = diskSampler.sample() {
+            append(&diskRead, Sample(time: now, value: rate.read))
+            append(&diskWrite, Sample(time: now, value: rate.write))
+        }
         fans = FanReader.read()
-        // Battery changes slowly – every 5 s is enough
+        // Battery and free space change slowly – every 5 s is enough
         if tickCount % 5 == 0 {
             battery = BatteryReader.read()
+            diskSpace = DiskSpace.read()
         }
         tickCount += 1
     }
@@ -136,6 +147,12 @@ enum Format {
     static func memory(_ bytes: UInt64) -> String {
         let mb = Double(bytes) / 1_048_576
         return mb >= 1024 ? String(format: "%.1f GB", mb / 1024) : String(format: "%.0f MB", mb)
+    }
+
+    /// Disk sizes in decimal units, like Finder: "245 GB", "1.2 TB".
+    static func storage(_ bytes: Int64) -> String {
+        let gb = Double(bytes) / 1_000_000_000
+        return gb >= 1000 ? String(format: "%.1f TB", gb / 1000) : String(format: "%.0f GB", gb)
     }
 
     static func gigabytes(_ bytes: UInt64) -> String {

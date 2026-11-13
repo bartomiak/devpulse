@@ -33,7 +33,7 @@ Network, CPU, memory, temperatures, fans and battery at a glance, plus the proce
 Download and upload speed, CPU load and temperature, memory usage, GPU temperature and battery level, each with its own icon. Numbers use fixed widths, so the menu bar doesn't jump around as values change.
 
 ### 📈 Live charts
-Click the menu bar item to open 60-second charts for **network**, **CPU**, **memory** and **CPU/GPU temperature**, plus **fan speeds** and **battery status** (charging, time remaining).
+Click the menu bar item to open 60-second charts for **network**, **CPU**, **memory**, **disk read/write** and **CPU/GPU temperature**, plus **free disk space**, **fan speeds** and **battery status** (charging, time remaining).
 
 ### 📶 Connection details
 Below the network chart: Wi-Fi signal quality (dBm, band, channel, link speed), local IP, latency to `1.1.1.1`, and your public IP on request. Click any IP to copy it.
@@ -133,6 +133,7 @@ VS Code users can press `⇧⌘B` to run the **Build & Run** task. Install the r
 | `Sources/DevPulse/Projects.swift` | Project and framework detection, opening projects in the editor |
 | `Sources/DevPulse/BrewServices.swift` | Services tab (`brew services`) |
 | `Sources/DevPulse/NetworkInfo.swift` | Wi-Fi details, IP addresses and ping |
+| `Sources/DevPulse/Disk.swift` | Disk throughput and free space |
 | `Sources/CSMC/` | AppleSMC and IOHIDEventSystem sensor access, written in C |
 
 </details>
@@ -145,6 +146,7 @@ VS Code users can press `⇧⌘B` to run the **Build & Run** task. Install the r
 | CPU | `host_statistics(HOST_CPU_LOAD_INFO)` tick deltas |
 | Network | 64-bit interface counters via `sysctl(NET_RT_IFLIST2)`, summed over `en*` interfaces |
 | Memory | `host_statistics64(HOST_VM_INFO64)`, computed like Activity Monitor (app + wired + compressed) |
+| Disk | `IOBlockStorageDriver` statistics for read/write, volume resource values for free space |
 | Battery | IOKit power sources (`IOPSCopyPowerSourcesInfo`) |
 | Temperatures (Intel) | AppleSMC via `IOConnectCallStructMethod` |
 | Temperatures (Apple Silicon) | `IOHIDEventSystemClient` temperature sensors, with SMC fallback |

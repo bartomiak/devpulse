@@ -34,6 +34,7 @@ struct ContentView: View {
                 networkSection
                 cpuSection
                 memorySection
+                diskSection
                 temperatureSection
                 if !monitor.fans.isEmpty {
                     fanSection
@@ -223,6 +224,66 @@ struct ContentView: View {
                 }
             }
             .frame(height: 70)
+        }
+    }
+
+    // MARK: Disk
+
+    private var diskSection: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack {
+                Label("Disk", systemImage: "internaldrive")
+                    .font(.headline)
+                Spacer()
+                Text("R \(Format.rate(monitor.currentDiskRead))")
+                    .foregroundStyle(.cyan)
+                Text("W \(Format.rate(monitor.currentDiskWrite))")
+                    .foregroundStyle(.pink)
+            }
+            .font(.callout.monospacedDigit())
+
+            Chart {
+                ForEach(monitor.diskRead) { s in
+                    AreaMark(x: .value("Time", s.time), y: .value("Read", s.value),
+                             series: .value("Direction", "read"))
+                        .foregroundStyle(.cyan.opacity(0.15))
+                        .interpolationMethod(.monotone)
+                    LineMark(x: .value("Time", s.time), y: .value("Read", s.value),
+                             series: .value("Direction", "read"))
+                        .foregroundStyle(.cyan)
+                        .interpolationMethod(.monotone)
+                }
+                ForEach(monitor.diskWrite) { s in
+                    LineMark(x: .value("Time", s.time), y: .value("Write", s.value),
+                             series: .value("Direction", "write"))
+                        .foregroundStyle(.pink)
+                        .interpolationMethod(.monotone)
+                }
+            }
+            .chartXAxis(.hidden)
+            .chartYAxis {
+                AxisMarks(position: .leading, values: .automatic(desiredCount: 3)) { value in
+                    AxisGridLine()
+                    AxisValueLabel {
+                        if let v = value.as(Double.self) {
+                            Text(Format.rate(v)).font(.caption2)
+                        }
+                    }
+                }
+            }
+            .frame(height: 70)
+
+            if let space = monitor.diskSpace {
+                HStack(spacing: 8) {
+                    ProgressView(value: space.usedFraction)
+                        .tint(space.usedFraction > 0.9 ? .red : space.usedFraction > 0.8 ? .orange : .accentColor)
+                    Text("\(Format.storage(space.available)) free of \(Format.storage(space.total))")
+                        .font(.caption.monospacedDigit())
+                        .foregroundStyle(.secondary)
+                        .fixedSize()
+                }
+                .help(space.name)
+            }
         }
     }
 
