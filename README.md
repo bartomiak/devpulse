@@ -80,9 +80,18 @@ open /Applications/DevPulse.app
 |---|:---:|:---:|
 | Network, CPU, memory, battery | ✅ | ✅ |
 | Processes and ports | ✅ | ✅ |
-| CPU/GPU temperature, fans | ✅ | ❌ *(not yet)* |
+| CPU/GPU temperature, fans | ✅ | 🧪 *experimental* |
 
-Temperatures and fan speeds come from the SMC, and Apple Silicon uses different sensor keys. I built DevPulse on an Intel MacBook Pro, so that's what it supports today. **Pull requests adding Apple Silicon sensors are very welcome!**
+Release builds are **universal binaries**, so one app runs natively on both architectures.
+
+**Temperatures on Apple Silicon** are read from the IOHIDEventSystem sensors (the CPU value is the average of the `pACC`/`eACC` core sensors, the GPU value is the average of the `GPU` sensors). If those aren't available, DevPulse falls back to known M1–M3 SMC keys. Fan speeds use the same SMC code as on Intel; fanless MacBook Airs simply hide the section.
+
+> [!NOTE]
+> I developed DevPulse on an Intel MacBook Pro, so **the Apple Silicon sensor code hasn't been tested on real hardware yet**. If you're on an M-series Mac, please run the command below and [open an issue](https://github.com/bartomiak/devpulse/issues/new) with the output, whether it works or not. Sensor names differ between chip generations, and your report helps get them right.
+>
+> ```bash
+> /Applications/DevPulse.app/Contents/MacOS/DevPulse --sensors
+> ```
 
 Requires **macOS 13 Ventura** or later.
 
@@ -90,7 +99,8 @@ Requires **macOS 13 Ventura** or later.
 
 ```bash
 ./run.sh               # debug build + restart the app
-./build.sh release     # release build → build/DevPulse.app
+./build.sh release     # universal release build → build/DevPulse.app
+build/DevPulse.app/Contents/MacOS/DevPulse --sensors   # print all detected sensors
 ```
 
 VS Code users can press `⇧⌘B` to run the **Build & Run** task. Install the recommended [Swift extension](https://marketplace.visualstudio.com/items?itemName=swiftlang.swift-vscode) for autocompletion.
@@ -104,10 +114,11 @@ VS Code users can press `⇧⌘B` to run the **Build & Run** task. Install the r
 | `Sources/DevPulse/ContentView.swift` | Popover with tabs and charts |
 | `Sources/DevPulse/Monitor.swift` | 1 s sampling loop, history, formatting |
 | `Sources/DevPulse/Sensors.swift` | CPU, network, memory, battery and temperature readers |
+| `Sources/DevPulse/Thermal.swift` | Picks the temperature source (HID on Apple Silicon, SMC on Intel), `--sensors` report |
 | `Sources/DevPulse/Fans.swift` | Fan speeds (SMC) |
 | `Sources/DevPulse/Processes.swift` | Top processes (`ps`), listening ports (`lsof`), terminating processes |
 | `Sources/DevPulse/ProcessViews.swift` | Processes and Ports tabs |
-| `Sources/CSMC/` | AppleSMC access, written in C |
+| `Sources/CSMC/` | AppleSMC and IOHIDEventSystem sensor access, written in C |
 
 </details>
 
@@ -120,7 +131,9 @@ VS Code users can press `⇧⌘B` to run the **Build & Run** task. Install the r
 | Network | 64-bit interface counters via `sysctl(NET_RT_IFLIST2)`, summed over `en*` interfaces |
 | Memory | `host_statistics64(HOST_VM_INFO64)`, computed like Activity Monitor (app + wired + compressed) |
 | Battery | IOKit power sources (`IOPSCopyPowerSourcesInfo`) |
-| Temperatures, fans | AppleSMC via `IOConnectCallStructMethod` |
+| Temperatures (Intel) | AppleSMC via `IOConnectCallStructMethod` |
+| Temperatures (Apple Silicon) | `IOHIDEventSystemClient` temperature sensors, with SMC fallback |
+| Fans | AppleSMC (`F<n>Ac`, `F<n>Mn`, `F<n>Mx`) |
 | Processes | `ps`, polled only while the popover is open |
 | Ports | `lsof` plus `proc_pidinfo` for each process's working directory |
 
@@ -140,7 +153,7 @@ It turned out useful enough that I'm sharing it. I hope it helps you too.
 
 Issues and pull requests are welcome, especially for:
 
-- Apple Silicon temperature and fan sensors
+- Testing on Apple Silicon (see [Compatibility](#compatibility)) and refining the sensor mapping
 - A settings panel (choose which stats appear in the menu bar)
 - Notifications (e.g. CPU temperature above a threshold)
 - Signed and notarized releases
