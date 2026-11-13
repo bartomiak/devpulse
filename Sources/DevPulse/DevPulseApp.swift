@@ -2,7 +2,7 @@ import AppKit
 import SwiftUI
 
 @main
-struct SysMonitorApp: App {
+struct DevPulseApp: App {
     @StateObject private var monitor = Monitor()
     @StateObject private var processMonitor = ProcessMonitor()
 

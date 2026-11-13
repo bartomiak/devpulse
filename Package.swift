@@ -2,7 +2,7 @@
 import PackageDescription
 
 let package = Package(
-    name: "SysMonitor",
+    name: "DevPulse",
     platforms: [.macOS(.v13)],
     targets: [
         // SMC access (Intel Macs) – written in C because it needs an exact struct layout.
@@ -11,7 +11,7 @@ let package = Package(
             linkerSettings: [.linkedFramework("IOKit")]
         ),
         .executableTarget(
-            name: "SysMonitor",
+            name: "DevPulse",
             dependencies: ["CSMC"]
         ),
     ]

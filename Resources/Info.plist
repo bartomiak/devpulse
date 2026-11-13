@@ -3,13 +3,13 @@
 <plist version="1.0">
 <dict>
     <key>CFBundleName</key>
-    <string>SysMonitor</string>
+    <string>DevPulse</string>
     <key>CFBundleDisplayName</key>
-    <string>SysMonitor</string>
+    <string>DevPulse</string>
     <key>CFBundleIdentifier</key>
-    <string>local.bart.sysmonitor</string>
+    <string>com.devpulse.app</string>
     <key>CFBundleExecutable</key>
-    <string>SysMonitor</string>
+    <string>DevPulse</string>
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>CFBundleShortVersionString</key>

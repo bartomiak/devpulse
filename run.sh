@@ -4,5 +4,5 @@ set -euo pipefail
 cd "$(dirname "$0")"
 
 ./build.sh "${1:-debug}"
-pkill -x SysMonitor 2>/dev/null || true
-open build/SysMonitor.app
+pkill -x DevPulse 2>/dev/null || true
+open build/DevPulse.app
