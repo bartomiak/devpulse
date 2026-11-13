@@ -18,6 +18,7 @@ struct ContentView: View {
     @ObservedObject var monitor: Monitor
     @ObservedObject var processMonitor: ProcessMonitor
     @ObservedObject var brewServices: BrewServicesModel
+    @ObservedObject var networkInfo: NetworkInfoModel
     @AppStorage("selectedTab") private var tab: Tab = .charts
 
     var body: some View {
@@ -141,6 +142,9 @@ struct ContentView: View {
                 }
             }
             .frame(height: 80)
+
+            NetworkInfoView(model: networkInfo)
+                .padding(.top, 2)
         }
     }
 

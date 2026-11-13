@@ -35,6 +35,11 @@ Download and upload speed, CPU load and temperature, memory usage, GPU temperatu
 ### 📈 Live charts
 Click the menu bar item to open 60-second charts for **network**, **CPU**, **memory** and **CPU/GPU temperature**, plus **fan speeds** and **battery status** (charging, time remaining).
 
+### 📶 Connection details
+Below the network chart: Wi-Fi signal quality (dBm, band, channel, link speed), local IP, latency to `1.1.1.1`, and your public IP on request. Click any IP to copy it.
+
+> macOS only reveals the **Wi-Fi network name** to apps with Location Services access. DevPulse asks for it only when you click *Show name*, and uses it for nothing else. The public IP is looked up via `api.ipify.org`, and only when you click *Show*.
+
 ### 🔥 Top processes
 The 10 heaviest processes, sortable by **CPU** or **memory**, with app icons. Terminate a runaway process in two clicks: the first click arms the button, the second one confirms. GUI apps are quit gracefully, like ⌘Q.
 
@@ -127,6 +132,7 @@ VS Code users can press `⇧⌘B` to run the **Build & Run** task. Install the r
 | `Sources/DevPulse/ProcessViews.swift` | Processes and Ports tabs |
 | `Sources/DevPulse/Projects.swift` | Project and framework detection, opening projects in the editor |
 | `Sources/DevPulse/BrewServices.swift` | Services tab (`brew services`) |
+| `Sources/DevPulse/NetworkInfo.swift` | Wi-Fi details, IP addresses and ping |
 | `Sources/CSMC/` | AppleSMC and IOHIDEventSystem sensor access, written in C |
 
 </details>

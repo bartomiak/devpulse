@@ -2,26 +2,29 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-    <key>CFBundleName</key>
-    <string>DevPulse</string>
-    <key>CFBundleDisplayName</key>
-    <string>DevPulse</string>
-    <key>CFBundleIdentifier</key>
-    <string>com.devpulse.app</string>
-    <key>CFBundleExecutable</key>
-    <string>DevPulse</string>
-    <key>CFBundlePackageType</key>
-    <string>APPL</string>
-    <key>CFBundleShortVersionString</key>
-    <string>1.0</string>
-    <key>CFBundleVersion</key>
-    <string>1</string>
-    <key>LSMinimumSystemVersion</key>
-    <string>13.0</string>
-    <!-- No Dock icon – menu bar only -->
-    <key>LSUIElement</key>
-    <true/>
-    <key>NSHighResolutionCapable</key>
-    <true/>
+	<key>CFBundleDisplayName</key>
+	<string>DevPulse</string>
+	<key>CFBundleExecutable</key>
+	<string>DevPulse</string>
+	<key>CFBundleIdentifier</key>
+	<string>com.devpulse.app</string>
+	<key>CFBundleName</key>
+	<string>DevPulse</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>1.0</string>
+	<key>CFBundleVersion</key>
+	<string>1</string>
+	<key>LSMinimumSystemVersion</key>
+	<string>13.0</string>
+	<key>LSUIElement</key>
+	<true/>
+	<key>NSHighResolutionCapable</key>
+	<true/>
+	<key>NSLocationUsageDescription</key>
+	<string>DevPulse uses Location Services only to show the name of your Wi-Fi network. macOS requires this permission to reveal it.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>DevPulse uses Location Services only to show the name of your Wi-Fi network. macOS requires this permission to reveal it.</string>
 </dict>
 </plist>
