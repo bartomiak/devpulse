@@ -2,13 +2,14 @@ import Charts
 import SwiftUI
 
 enum Tab: String, CaseIterable {
-    case charts, processes, ports
+    case charts, processes, ports, services
 
     var title: String {
         switch self {
         case .charts:    return "Charts"
         case .processes: return "Processes"
         case .ports:     return "Ports"
+        case .services:  return "Services"
         }
     }
 }
@@ -16,6 +17,7 @@ enum Tab: String, CaseIterable {
 struct ContentView: View {
     @ObservedObject var monitor: Monitor
     @ObservedObject var processMonitor: ProcessMonitor
+    @ObservedObject var brewServices: BrewServicesModel
     @AppStorage("selectedTab") private var tab: Tab = .charts
 
     var body: some View {
@@ -42,6 +44,8 @@ struct ContentView: View {
                 ProcessesView(processMonitor: processMonitor)
             case .ports:
                 PortsView(processMonitor: processMonitor)
+            case .services:
+                ServicesView(model: brewServices)
             }
 
             Divider()
@@ -64,6 +68,7 @@ struct ContentView: View {
         case .charts:    return "Last \(Monitor.historyLength) s"
         case .processes: return "Refreshed every 3 s"
         case .ports:     return "Click a port to open it in the browser"
+        case .services:  return "Managed with brew services"
         }
     }
 

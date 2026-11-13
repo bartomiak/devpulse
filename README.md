@@ -55,6 +55,9 @@ The reason this app exists. You get every listening TCP port **together with the
 - 🌐 marks services **exposed to your local network** (bound to `0.0.0.0`, not just `localhost`)
 - macOS system services (AirPlay, Handoff…) are hidden by default
 
+### 🍺 Homebrew services
+See which `brew services` are running (PostgreSQL, Redis, MySQL…) and **start, stop or restart** them with one click, without remembering the exact formula name. The list is only refreshed while the tab is open.
+
 ### 🪶 Lightweight and native
 Written in Swift and SwiftUI, with no Electron and no dependencies. Processes and ports are only polled while the popover is open, so it costs next to nothing in the background. No Dock icon.
 
@@ -123,6 +126,7 @@ VS Code users can press `⇧⌘B` to run the **Build & Run** task. Install the r
 | `Sources/DevPulse/Processes.swift` | Top processes (`ps`), listening ports (`lsof`), terminating processes |
 | `Sources/DevPulse/ProcessViews.swift` | Processes and Ports tabs |
 | `Sources/DevPulse/Projects.swift` | Project and framework detection, opening projects in the editor |
+| `Sources/DevPulse/BrewServices.swift` | Services tab (`brew services`) |
 | `Sources/CSMC/` | AppleSMC and IOHIDEventSystem sensor access, written in C |
 
 </details>

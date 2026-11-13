@@ -5,6 +5,7 @@ import SwiftUI
 struct DevPulseApp: App {
     @StateObject private var monitor = Monitor()
     @StateObject private var processMonitor = ProcessMonitor()
+    @StateObject private var brewServices = BrewServicesModel()
 
     init() {
         // `DevPulse --sensors` prints every sensor it can see and exits – useful for bug reports.
@@ -16,7 +17,7 @@ struct DevPulseApp: App {
 
     var body: some Scene {
         MenuBarExtra {
-            ContentView(monitor: monitor, processMonitor: processMonitor)
+            ContentView(monitor: monitor, processMonitor: processMonitor, brewServices: brewServices)
         } label: {
             MenuBarLabel(monitor: monitor)
         }

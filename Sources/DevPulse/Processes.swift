@@ -239,16 +239,37 @@ enum PortReader {
 // MARK: - Running commands
 
 enum Shell {
-    static func run(_ executable: String, _ arguments: [String]) -> String? {
+    struct Result {
+        let output: String
+        let status: Int32
+        var succeeded: Bool { status == 0 }
+    }
+
+    /// Runs a command and returns its standard output (nil if it couldn't be started).
+    static func run(_ executable: String, _ arguments: [String],
+                    environment: [String: String] = [:]) -> String? {
+        execute(executable, arguments, environment: environment)?.output
+    }
+
+    /// Runs a command and returns its output and exit status.
+    /// With `includeErrors`, standard error is captured too (useful for showing failures).
+    static func execute(_ executable: String, _ arguments: [String],
+                        environment: [String: String] = [:],
+                        includeErrors: Bool = false) -> Result? {
         let process = Process()
         process.executableURL = URL(fileURLWithPath: executable)
         process.arguments = arguments
+
+        var env = ProcessInfo.processInfo.environment
         // LC_ALL=C – so ps prints "27.5" rather than "27,5" in locales with a decimal comma
-        process.environment = ["LC_ALL": "C", "PATH": "/usr/bin:/bin:/usr/sbin:/sbin"]
+        env["LC_ALL"] = "C"
+        env["PATH"] = "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+        env.merge(environment) { _, new in new }
+        process.environment = env
 
         let pipe = Pipe()
         process.standardOutput = pipe
-        process.standardError = FileHandle.nullDevice
+        process.standardError = includeErrors ? pipe : FileHandle.nullDevice
 
         do {
             try process.run()
@@ -257,6 +278,6 @@ enum Shell {
         }
         let data = pipe.fileHandleForReading.readDataToEndOfFile()
         process.waitUntilExit()
-        return String(decoding: data, as: UTF8.self)
+        return Result(output: String(decoding: data, as: UTF8.self), status: process.terminationStatus)
     }
 }
