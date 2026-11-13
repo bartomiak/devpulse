@@ -21,9 +21,14 @@ Network, CPU, memory, temperatures, fans and battery at a glance, plus the proce
 
 <table>
   <tr>
-    <td align="center"><img src="docs/screenshots/charts.png" alt="Live charts" width="270"><br><sub><b>Charts</b>: live 60 s history</sub></td>
-    <td align="center"><img src="docs/screenshots/processes.png" alt="Top processes" width="270"><br><sub><b>Processes</b>: what's eating your CPU and RAM</sub></td>
-    <td align="center"><img src="docs/screenshots/ports.png" alt="Listening ports" width="270"><br><sub><b>Ports</b>: which project owns which port</sub></td>
+    <td align="center" valign="top"><img src="docs/screenshots/charts.png" alt="Live charts" width="270"><br><sub><b>Charts</b>: live 60 s history</sub></td>
+    <td align="center" valign="top"><img src="docs/screenshots/processes.png" alt="Top processes" width="270"><br><sub><b>Processes</b>: what's eating your CPU and RAM</sub></td>
+    <td align="center" valign="top"><img src="docs/screenshots/ports.png" alt="Listening ports" width="270"><br><sub><b>Ports</b>: which project owns which port</sub></td>
+  </tr>
+  <tr>
+    <td align="center" valign="top"><img src="docs/screenshots/services.png" alt="Homebrew services" width="270"><br><sub><b>Services</b>: start and stop <code>brew services</code></sub></td>
+    <td align="center" valign="top"><img src="docs/screenshots/settings.png" alt="Settings" width="270"><br><sub><b>Settings</b>: pick what you see</sub></td>
+    <td></td>
   </tr>
 </table>
 
