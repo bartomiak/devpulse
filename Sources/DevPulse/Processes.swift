@@ -18,13 +18,28 @@ struct ListeningPort: Identifiable, Sendable {
     let pid: Int32
     let port: Int
     let processName: String
-    /// The process working directory, e.g. "~/dev/my-app" – tells you which project it is.
-    let directory: String?
+    /// The process working directory (absolute path).
+    let directoryPath: String?
+    /// The project the process runs from (package.json, Gemfile…), if recognized.
+    let project: ProjectInfo?
+    /// A well-known service (PostgreSQL, Redis…), recognized by process name.
+    let service: Framework?
     /// Listens on all interfaces (reachable from the network), not just localhost.
     var isExposed: Bool
     let isSystem: Bool
 
     var id: String { "\(pid)-\(port)" }
+
+    var framework: Framework? { project?.framework ?? service }
+
+    /// Path shown under the name, e.g. "~/dev/my-app".
+    var directory: String? {
+        guard let path = project?.root ?? directoryPath else { return nil }
+        let home = NSHomeDirectory()
+        return path.hasPrefix(home) ? "~" + path.dropFirst(home.count) : path
+    }
+
+    var url: URL? { URL(string: "http://localhost:\(port)") }
 }
 
 enum ProcessSort: String, CaseIterable {
@@ -188,11 +203,14 @@ enum PortReader {
                     existing.isExposed = existing.isExposed || exposed
                     result[key] = existing
                 } else {
+                    let directory = workingDirectory(of: pid)
                     result[key] = ListeningPort(
                         pid: pid,
                         port: port,
                         processName: command,
-                        directory: workingDirectory(of: pid),
+                        directoryPath: directory,
+                        project: directory.flatMap(ProjectDetector.detect(directory:)),
+                        service: ProjectDetector.service(forProcess: command),
                         isExposed: exposed,
                         isSystem: systemProcesses.contains(command)
                     )
@@ -204,7 +222,7 @@ enum PortReader {
         return result.values.sorted { $0.port < $1.port }
     }
 
-    /// The process working directory (works for the current user's processes).
+    /// The process working directory as an absolute path (works for the current user's processes).
     static func workingDirectory(of pid: Int32) -> String? {
         var info = proc_vnodepathinfo()
         let size = Int32(MemoryLayout<proc_vnodepathinfo>.size)
@@ -213,9 +231,8 @@ enum PortReader {
         let path = withUnsafeBytes(of: &info.pvi_cdir.vip_path) { raw in
             String(cString: raw.bindMemory(to: CChar.self).baseAddress!)
         }
-        let home = NSHomeDirectory()
-        guard !path.isEmpty, path != "/", path != home else { return nil }
-        return path.hasPrefix(home) ? "~" + path.dropFirst(home.count) : path
+        guard !path.isEmpty, path != "/", path != NSHomeDirectory() else { return nil }
+        return path
     }
 }
 

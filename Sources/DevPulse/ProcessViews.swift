@@ -114,12 +114,12 @@ private struct PortRow: View {
     let port: ListeningPort
     let onTerminate: () -> Void
 
+    private var projectRoot: String? { port.project?.root ?? port.directoryPath }
+
     var body: some View {
         HStack(spacing: 8) {
             Button {
-                if let url = URL(string: "http://localhost:\(port.port)") {
-                    NSWorkspace.shared.open(url)
-                }
+                if let url = port.url { NSWorkspace.shared.open(url) }
             } label: {
                 // String(...) – otherwise some locales insert a grouping separator: ":5 432"
                 Text(verbatim: ":" + String(port.port))
@@ -129,17 +129,20 @@ private struct PortRow: View {
             .buttonStyle(.link)
             .help("Open http://localhost:\(port.port)")
 
-            VStack(alignment: .leading, spacing: 1) {
-                Text(port.processName)
-                    .font(.callout)
-                    .lineLimit(1)
-                if let directory = port.directory {
-                    Text(directory)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
+            VStack(alignment: .leading, spacing: 2) {
+                HStack(spacing: 6) {
+                    Text(port.project?.name ?? port.processName)
+                        .font(.callout)
                         .lineLimit(1)
-                        .truncationMode(.head)
+                    if let framework = port.framework {
+                        FrameworkBadge(framework: framework)
+                    }
                 }
+                Text(subtitle)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+                    .truncationMode(.head)
             }
 
             Spacer(minLength: 4)
@@ -150,9 +153,76 @@ private struct PortRow: View {
                     .help("Reachable from the local network (listening on all interfaces)")
             }
 
+            if let root = projectRoot, port.project != nil {
+                Button {
+                    Editor.open(root)
+                } label: {
+                    Image(systemName: "chevron.left.forwardslash.chevron.right")
+                        .foregroundStyle(.secondary)
+                        .frame(width: 20)
+                }
+                .buttonStyle(.plain)
+                .help("Open in \(Editor.preferred?.name ?? "Finder")")
+            }
+
             KillButton(action: onTerminate)
         }
         .padding(.vertical, 3)
+        .contentShape(Rectangle())
+        .contextMenu { contextMenu }
+    }
+
+    /// "node · ~/dev/my-app", or just the process name when there's no directory.
+    private var subtitle: String {
+        guard let directory = port.directory else { return "\(port.processName) · PID \(port.pid)" }
+        return "\(port.processName) · \(directory)"
+    }
+
+    @ViewBuilder
+    private var contextMenu: some View {
+        if let url = port.url {
+            Button("Open in Browser") { NSWorkspace.shared.open(url) }
+            Button("Copy URL") {
+                NSPasteboard.general.clearContents()
+                NSPasteboard.general.setString(url.absoluteString, forType: .string)
+            }
+        }
+        if let root = projectRoot {
+            Divider()
+            if let editor = Editor.preferred {
+                Button("Open in \(editor.name)") { Editor.open(root) }
+            }
+            Button("Open in Terminal") { Editor.openInTerminal(root) }
+            Button("Show in Finder") { Editor.revealInFinder(root) }
+        }
+    }
+}
+
+private struct FrameworkBadge: View {
+    let framework: Framework
+
+    var body: some View {
+        Text(framework.displayName)
+            .font(.caption2.weight(.semibold))
+            .foregroundStyle(framework.color)
+            .padding(.horizontal, 5)
+            .padding(.vertical, 1)
+            .background(Capsule().fill(framework.color.opacity(0.18)))
+    }
+}
+
+extension Framework {
+    var color: Color {
+        switch self {
+        case .nuxt, .vue, .mongodb, .nginx, .django: return .green
+        case .next, .express, .node, .fastify: return .secondary
+        case .vite, .astro, .remix: return .purple
+        case .sveltekit, .rust: return .orange
+        case .angular, .nest, .rails, .laravel, .redis: return .red
+        case .react, .go: return .cyan
+        case .flask, .fastapi: return .teal
+        case .postgres, .mysql, .docker: return .blue
+        }
     }
 }
 

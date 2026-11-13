@@ -39,13 +39,17 @@ Click the menu bar item to open 60-second charts for **network**, **CPU**, **mem
 The 10 heaviest processes, sortable by **CPU** or **memory**, with app icons. Terminate a runaway process in two clicks: the first click arms the button, the second one confirms. GUI apps are quit gracefully, like ⌘Q.
 
 ### 🔌 Listening ports, made for developers
-The reason this app exists. You get every listening TCP port **together with the working directory of the process**, so instead of five anonymous `node` processes you see:
+The reason this app exists. You get every listening TCP port **together with the project and framework behind it**, so instead of five anonymous `node` processes you see:
 
 ```
-:3000   node   ~/dev/my-nuxt-app
-:8080   node   ~/dev/api-server     🌐
+:3000   my-nuxt-app   [Nuxt]         node · ~/dev/my-nuxt-app
+:5432   postgres      [PostgreSQL]
+:8080   api-server    [Express]  🌐  node · ~/dev/api-server
 ```
 
+- **Framework detection** from `package.json` (Nuxt, Next.js, SvelteKit, Astro, Remix, Angular, NestJS, Vite, Express…), plus Django, Flask, FastAPI, Rails, Laravel, Go and Rust projects, and services like PostgreSQL, MySQL, Redis and MongoDB
+- **Open the project in your editor** with one click (VS Code, Cursor, Zed or Sublime Text, whichever is installed)
+- **Right-click** a port to copy its URL or open the project in Terminal or Finder
 - **Click a port** to open `http://localhost:<port>` in your browser
 - **Kill a stale dev server** that's still holding a port, without hunting it down with `lsof`
 - 🌐 marks services **exposed to your local network** (bound to `0.0.0.0`, not just `localhost`)
@@ -118,6 +122,7 @@ VS Code users can press `⇧⌘B` to run the **Build & Run** task. Install the r
 | `Sources/DevPulse/Fans.swift` | Fan speeds (SMC) |
 | `Sources/DevPulse/Processes.swift` | Top processes (`ps`), listening ports (`lsof`), terminating processes |
 | `Sources/DevPulse/ProcessViews.swift` | Processes and Ports tabs |
+| `Sources/DevPulse/Projects.swift` | Project and framework detection, opening projects in the editor |
 | `Sources/CSMC/` | AppleSMC and IOHIDEventSystem sensor access, written in C |
 
 </details>
