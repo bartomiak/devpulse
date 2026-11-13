@@ -20,6 +20,7 @@ struct ContentView: View {
     @ObservedObject var brewServices: BrewServicesModel
     @ObservedObject var networkInfo: NetworkInfoModel
     @AppStorage("selectedTab") private var tab: Tab = .charts
+    @State private var chartsHeight: CGFloat = 0
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -31,17 +32,7 @@ struct ContentView: View {
 
             switch tab {
             case .charts:
-                networkSection
-                cpuSection
-                memorySection
-                diskSection
-                temperatureSection
-                if !monitor.fans.isEmpty {
-                    fanSection
-                }
-                if let battery = monitor.battery {
-                    batterySection(battery)
-                }
+                chartsTab
             case .processes:
                 ProcessesView(processMonitor: processMonitor)
             case .ports:
@@ -63,6 +54,47 @@ struct ContentView: View {
         }
         .padding(16)
         .frame(width: 360)
+    }
+
+    // MARK: Charts tab
+
+    /// Scrolls only when the charts don't fit on screen (e.g. 13" laptops):
+    /// the content height is measured and the scroll view is sized to fit it, up to the screen limit.
+    private var chartsTab: some View {
+        let needsScroll = chartsHeight > Self.maxChartsHeight
+        return ScrollView {
+            chartSections
+                .padding(.trailing, needsScroll ? 12 : 0)
+                .background(
+                    GeometryReader { geometry in
+                        Color.clear.preference(key: ContentHeightKey.self, value: geometry.size.height)
+                    }
+                )
+        }
+        .scrollDisabled(!needsScroll)
+        .frame(height: min(chartsHeight, Self.maxChartsHeight))
+        .onPreferenceChange(ContentHeightKey.self) { chartsHeight = $0 }
+    }
+
+    private var chartSections: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            networkSection
+            cpuSection
+            memorySection
+            diskSection
+            temperatureSection
+            if !monitor.fans.isEmpty {
+                fanSection
+            }
+            if let battery = monitor.battery {
+                batterySection(battery)
+            }
+        }
+    }
+
+    /// Screen height minus room for the menu bar, tab picker and footer.
+    private static var maxChartsHeight: CGFloat {
+        max((NSScreen.main?.visibleFrame.height ?? 900) - 140, 320)
     }
 
     private var footerText: String {
@@ -374,5 +406,12 @@ struct ContentView: View {
                 .frame(height: 70)
             }
         }
+    }
+}
+
+private struct ContentHeightKey: PreferenceKey {
+    static var defaultValue: CGFloat = 0
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
+        value = max(value, nextValue())
     }
 }
